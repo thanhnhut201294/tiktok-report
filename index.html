@@ -3,25 +3,33 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>TikTok Multi-Link Analyzer</title>
+  <title>TikTok Multi-Link Analyzer Pro</title>
   <style>
-    /* === GIỮ NGUYÊN CSS GỐC VÀ CẬP NHẬT GIAO DIỆN === */
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding:20px; background:#f4f5f7; color:#333; }
+    /* === CẤU HÌNH MÀU SẮC CHỦ ĐẠO (#014a1d) === */
+    :root {
+      --primary-color: #014a1d;       /* Màu xanh chủ đạo */
+      --primary-hover: #025e25;       /* Màu xanh khi hover */
+      --light-bg: #e6f0ea;            /* Nền nhạt cho các box */
+      --text-color: #333;
+    }
+
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding:20px; background:#f4f5f7; color:var(--text-color); }
     main { max-width:1200px; margin: 0 auto; background: #fff; padding: 25px; border-radius:12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-    h1 { margin-top:0; text-align: center; color: #fe2c55; display: flex; align-items: center; justify-content: center; gap: 10px;}
+    
+    h1 { margin-top:0; text-align: center; color: var(--primary-color); display: flex; align-items: center; justify-content: center; gap: 10px;}
     
     /* Vùng nhập liệu */
     .input-area { margin-bottom: 20px; }
     label { font-weight: 600; margin-bottom: 8px; display: block; font-size: 14px; color: #555;}
-    textarea { width: 100%; height: 120px; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; resize: vertical; box-sizing: border-box; font-family: monospace;}
-    textarea:focus { outline: none; border-color: #fe2c55; }
+    textarea { width: 100%; height: 100px; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; resize: vertical; box-sizing: border-box; font-family: monospace;}
+    textarea:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(1, 74, 29, 0.1); }
 
-    /* Thanh công cụ nút bấm */
+    /* Thanh công cụ */
     .toolbar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;}
     button { padding: 0 20px; border: none; border-radius: 6px; cursor:pointer; font-weight: 600; font-size: 14px; height: 40px; transition: 0.2s; white-space: nowrap; display: flex; align-items: center; gap: 6px;}
     
-    #fetchBtn { background:#fe2c55; color:#fff; }
-    #fetchBtn:hover { background:#e0244a; }
+    #fetchBtn { background:var(--primary-color); color:#fff; }
+    #fetchBtn:hover { background:var(--primary-hover); }
     #fetchBtn:disabled { background:#ccc; cursor: not-allowed; opacity: 0.7;}
     
     .btn-secondary { background: #f1f1f2; color: #161823; border: 1px solid #e1e1e1; }
@@ -31,10 +39,44 @@
     .btn-excel:hover { background:#00a098; }
     .btn-excel:disabled { background:#ccc; cursor: not-allowed;}
 
+    /* === DASHBOARD THỐNG KÊ (Mới) === */
+    #stats-board { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); 
+      gap: 15px; 
+      margin-bottom: 25px; 
+      padding: 15px;
+      background: #fafafa;
+      border-radius: 10px;
+      border: 1px solid #eee;
+    }
+    
+    .stat-card { 
+      background: #fff; 
+      padding: 15px; 
+      border-radius: 8px; 
+      border: 1px solid #eee; 
+      text-align: center; 
+      box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+    }
+    .stat-title { font-size: 12px; text-transform: uppercase; color: #666; letter-spacing: 0.5px; margin-bottom: 8px; }
+    .stat-value { font-size: 22px; font-weight: 800; color: #333; margin-bottom: 5px; }
+    
+    /* Pill hiển thị trung bình */
+    .stat-avg { 
+      font-size: 12px; 
+      color: var(--primary-color); 
+      font-weight: 600; 
+      background: rgba(1, 74, 29, 0.1); /* Màu xanh nhạt */
+      display: inline-block; 
+      padding: 3px 10px; 
+      border-radius: 12px;
+    }
+
     /* Logger */
     #status { margin-bottom:15px; padding: 10px; border-radius: 6px; background: #f8f9fa; font-family: monospace; font-size: 13px; color: #333; border-left: 4px solid #ddd;}
     .log-process { border-left-color: #007bff !important; background: #ebf5ff !important; color: #004085 !important; }
-    .log-done { border-left-color: #28a745 !important; background: #e8f5e9 !important; color: #155724 !important; }
+    .log-done { border-left-color: var(--primary-color) !important; background: var(--light-bg) !important; color: var(--primary-color) !important; }
 
     /* Table */
     .table-container { overflow-x: auto; border: 1px solid #eee; border-radius: 8px; }
@@ -46,24 +88,50 @@
     .col-thumb img { width: 40px; height: 40px; object-fit: cover; border-radius: 4px; background: #eee; border: 1px solid #ddd;}
     .col-caption { max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 13px;}
     .col-status { font-weight: bold; font-size: 12px; }
-    .status-ok { color: #28a745; }
+    .status-ok { color: var(--primary-color); }
     .status-err { color: #dc3545; }
-    .col-link a { color: #fe2c55; text-decoration: none; font-size: 13px;}
+    .col-link a { color: var(--primary-color); text-decoration: none; font-size: 13px;}
     .col-link a:hover { text-decoration: underline; }
 
     .stat-num { font-family: monospace; font-size: 14px; }
-
-    /* Hiệu ứng loading dòng */
     .loading-row { opacity: 0.5; background: #fffcfc; }
   </style>
 </head>
 <body>
   <main>
-    <h1>TikTok Multi-Link Stats</h1>
+    <h1>TikTok Analytics Pro</h1>
     
+    <div id="stats-board">
+        <div class="stat-card">
+            <div class="stat-title">Tổng Lượt Xem</div>
+            <div class="stat-value" id="total-view">0</div>
+            <div class="stat-avg" id="avg-view">TB: 0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-title">Tổng Tim</div>
+            <div class="stat-value" id="total-like">0</div>
+            <div class="stat-avg" id="avg-like">TB: 0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-title">Tổng Comment</div>
+            <div class="stat-value" id="total-cmt">0</div>
+            <div class="stat-avg" id="avg-cmt">TB: 0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-title">Tổng Lưu</div>
+            <div class="stat-value" id="total-save">0</div>
+            <div class="stat-avg" id="avg-save">TB: 0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-title">Tổng Chia Sẻ</div>
+            <div class="stat-value" id="total-share">0</div>
+            <div class="stat-avg" id="avg-share">TB: 0</div>
+        </div>
+    </div>
+
     <div class="input-area">
       <label>Danh sách link TikTok (Mỗi link 1 dòng):</label>
-      <textarea id="linkInput" placeholder="https://www.tiktok.com/@username/video/123456...&#10;https://vt.tiktok.com/AbCdEf/..."></textarea>
+      <textarea id="linkInput" placeholder="Dán link vào đây..."></textarea>
     </div>
 
     <div class="toolbar">
@@ -92,8 +160,7 @@
             <th>Trạng thái</th>
           </tr>
         </thead>
-        <tbody id="tableBody">
-          </tbody>
+        <tbody id="tableBody"></tbody>
       </table>
     </div>
   </main>
@@ -106,7 +173,7 @@
         { url: 'https://api.allorigins.win/get?url=', type: 'wrapped' }
     ];
 
-    let processedData = []; // Lưu dữ liệu để xuất Excel
+    let processedData = []; 
     let isProcessing = false;
 
     // === HÀM TIỆN ÍCH ===
@@ -117,8 +184,45 @@
       el.className = type;
     };
     const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+    const fmt = (n) => n.toLocaleString('vi-VN'); // Format số 1.000.000
 
-    // Hàm gọi API thông minh (Giữ nguyên logic proxy rotation)
+    // Cập nhật Dashboard thống kê
+    function updateDashboard() {
+        let tView = 0, tLike = 0, tCmt = 0, tSave = 0, tShare = 0;
+        
+        // Chỉ tính các video lấy thành công (OK)
+        const validItems = processedData.filter(i => i.status === 'OK');
+        const count = validItems.length;
+
+        validItems.forEach(i => {
+            tView += i.view;
+            tLike += i.like;
+            tCmt += i.comment;
+            tSave += i.save;
+            tShare += i.share;
+        });
+
+        // Hàm tính trung bình
+        const calcAvg = (total) => count > 0 ? fmt(Math.round(total / count)) : '0';
+
+        // Render ra HTML
+        $('total-view').innerText = fmt(tView);
+        $('avg-view').innerText = `TB: ${calcAvg(tView)}`;
+
+        $('total-like').innerText = fmt(tLike);
+        $('avg-like').innerText = `TB: ${calcAvg(tLike)}`;
+
+        $('total-cmt').innerText = fmt(tCmt);
+        $('avg-cmt').innerText = `TB: ${calcAvg(tCmt)}`;
+
+        $('total-save').innerText = fmt(tSave);
+        $('avg-save').innerText = `TB: ${calcAvg(tSave)}`;
+
+        $('total-share').innerText = fmt(tShare);
+        $('avg-share').innerText = `TB: ${calcAvg(tShare)}`;
+    }
+
+    // === API FETCH ===
     async function smartFetch(targetUrl) {
         for (const proxy of PROXY_LIST) {
             try {
@@ -135,15 +239,12 @@
                     data = await res.json();
                 }
                 return data; 
-            } catch (e) {
-                console.warn(`Proxy ${proxy.url} failed, trying next...`);
-                continue;
-            }
+            } catch (e) { continue; }
         }
         throw new Error("Tất cả Proxy đều thất bại.");
     }
 
-    // === XỬ LÝ CHÍNH ===
+    // === LOGIC CHÍNH ===
     $('fetchBtn').addEventListener('click', async () => {
         if (isProcessing) return;
 
@@ -153,10 +254,11 @@
         const links = rawText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
         if (links.length === 0) return;
 
-        // Reset trạng thái
         isProcessing = true;
-        processedData = []; // Reset data cũ nếu muốn quét mới hoàn toàn hoặc giữ lại tuỳ logic (ở đây reset)
+        processedData = []; 
         $('tableBody').innerHTML = ''; 
+        updateDashboard(); // Reset thống kê về 0
+        
         $('fetchBtn').disabled = true;
         $('exportBtn').disabled = true;
 
@@ -166,12 +268,10 @@
             const link = links[i];
             const rowId = i + 1;
             
-            // Tạo dòng loading
             createRowUI(rowId, link, null, true);
-            log(`⏳ Đang lấy dữ liệu dòng ${rowId}/${links.length}...`, 'log-process');
+            log(`⏳ Đang xử lý ${rowId}/${links.length}...`, 'log-process');
 
             try {
-                // Gọi API TikWM để lấy thông tin 1 video
                 const apiUrl = `https://www.tikwm.com/api/?url=${link}&hd=1`;
                 const data = await smartFetch(apiUrl);
 
@@ -181,7 +281,7 @@
                         id: rowId,
                         link: link,
                         author: info.author.unique_id,
-                        avatar: info.cover, // Dùng cover video làm ảnh
+                        avatar: info.cover,
                         caption: info.title || '',
                         view: info.play_count || 0,
                         like: info.digg_count || 0,
@@ -196,17 +296,14 @@
                     throw new Error("Không tìm thấy video");
                 }
             } catch (err) {
-                console.error(err);
-                const errorObj = {
-                    id: rowId,
-                    link: link,
-                    status: 'ERROR'
-                };
+                const errorObj = { id: rowId, link: link, status: 'ERROR' };
                 processedData.push(errorObj);
                 updateRowUI(rowId, errorObj, true);
             }
+            
+            // Cập nhật thống kê ngay lập tức sau mỗi dòng
+            updateDashboard();
 
-            // Throttle: Nghỉ 600ms - 1000ms giữa các request để tránh bị chặn
             if (i < links.length - 1) await sleep(800); 
         }
 
@@ -234,7 +331,7 @@
             <td>-</td>
             <td>-</td>
             <td class="col-link"><a href="${link}" target="_blank">Xem</a></td>
-            <td class="col-status" style="color:#999">Đang tải...</td>
+            <td class="col-status" style="color:#999">Running...</td>
         `;
         tbody.appendChild(tr);
     }
@@ -242,18 +339,16 @@
     function updateRowUI(id, data, isError = false) {
         const tr = $(`row-${id}`);
         if (!tr) return;
-        
         tr.classList.remove('loading-row');
 
         if (isError) {
             tr.innerHTML = `
                 <td>${id}</td>
-                <td colspan="8" style="color: #dc3545; text-align:center;">Lỗi: Không lấy được thông tin hoặc Link sai</td>
+                <td colspan="8" style="color: #dc3545; text-align:center;">Lỗi: Không lấy được thông tin</td>
                 <td class="col-link"><a href="${data.link}" target="_blank">Link</a></td>
                 <td class="col-status status-err">ERROR</td>
             `;
         } else {
-            const fmt = (n) => n.toLocaleString('vi-VN');
             tr.innerHTML = `
                 <td>${id}</td>
                 <td class="col-thumb"><img src="${data.avatar}" loading="lazy"></td>
@@ -270,59 +365,44 @@
         }
     }
 
-    // === CÁC NÚT CHỨC NĂNG KHÁC ===
-    
-    // Xoá bảng
+    // === CHỨC NĂNG PHỤ ===
     $('clearBtn').addEventListener('click', () => {
         $('linkInput').value = '';
         $('tableBody').innerHTML = '';
-        $('exportBtn').disabled = true;
         processedData = [];
+        updateDashboard(); // Reset dashboard
+        $('exportBtn').disabled = true;
         log("Đã xoá dữ liệu.");
     });
 
-    // Dán mẫu (Demo)
+    // Nút Dán Mẫu (Đã cập nhật link theo yêu cầu)
     $('sampleBtn').addEventListener('click', () => {
         const sampleLinks = [
-            "https://www.tiktok.com/@vtv24news/video/73312345678912345",
-            "https://www.tiktok.com/@schannelvn/video/73298765432109876",
-            "https://vt.tiktok.com/ZSjJ8H/"
+            "https://www.tiktok.com/@letuankhang2002/video/7578120269450071304",
+            "https://www.tiktok.com/@letuankhang2002/video/7572146167778397447",
+            "https://vt.tiktok.com/ZSfGHPdRK/"
         ];
         $('linkInput').value = sampleLinks.join('\n');
     });
 
-    // Xuất Excel (CSV)
+    // Xuất Excel
     $('exportBtn').addEventListener('click', () => {
         if (!processedData.length) return;
-
         const headers = ['STT', 'Kenh', 'Caption', 'View', 'Like', 'Comment', 'Save', 'Share', 'Link Goc', 'Trang Thai'];
-        
         const rows = processedData.map(item => {
-            if (item.status === 'ERROR') {
-                return [item.id, '', 'ERROR', 0, 0, 0, 0, 0, item.link, 'ERROR'];
-            }
-            // Xử lý caption chứa xuống dòng hoặc dấu phẩy
+            if (item.status === 'ERROR') return [item.id, '', 'ERROR', 0, 0, 0, 0, 0, item.link, 'ERROR'];
             const safeCaption = `"${(item.caption || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`;
             return [
-                item.id,
-                item.author,
-                safeCaption,
-                item.view,
-                item.like,
-                item.comment,
-                item.save,
-                item.share,
-                item.link,
-                'OK'
+                item.id, item.author, safeCaption, 
+                item.view, item.like, item.comment, item.save, item.share, 
+                item.link, 'OK'
             ];
         });
-
         const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
         const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", `TikTok_Export_${new Date().toISOString().slice(0,10)}.csv`);
+        link.href = URL.createObjectURL(blob);
+        link.setAttribute("download", `TikTok_Stats_${new Date().toISOString().slice(0,10)}.csv`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
