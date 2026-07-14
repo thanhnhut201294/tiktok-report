@@ -28,6 +28,7 @@
     #fetchBtn:hover:not(:disabled){background:#ff3370}
     .btn-sec{background:var(--white)}.btn-sec:hover{background:#f0f0f0}
     .btn-excel{background:var(--secondary)}.btn-excel:hover{background:#33fff8}
+    .btn-copy{background:var(--yellow)}.btn-copy:hover:not(:disabled){background:#ffe94d}
     #status{margin-bottom:16px;padding:12px 16px;border-radius:10px;font-weight:600;border:3px solid var(--bd);background:#fff;font-size:14px;min-height:46px}
     .log-process{background:#e3f2fd!important;color:#0d47a1}
     .log-done{background:#e8f5e9!important;color:#1b5e20}
@@ -72,6 +73,7 @@
     <button class="btn-sec" id="clearBtn">🧹 Xoá Sạch</button>
     <button class="btn-sec" id="sampleBtn">📋 Dán Link Mẫu</button>
     <button class="btn-excel" id="exportBtn" disabled>📥 Xuất CSV</button>
+    <button class="btn-copy" id="copyBtn" disabled>📎 Copy Nhanh</button>
   </div>
 
   <div id="status">👋 Sẵn sàng làm việc!</div>
@@ -171,7 +173,7 @@ $('fetchBtn').addEventListener('click', async () => {
   const links = rawText.split('\n').map(l=>l.trim()).filter(Boolean);
   isProcessing=true; processedData=[]; $('tableBody').innerHTML=''; $('debug-log').innerHTML='';
   updateDashboard();
-  $('fetchBtn').disabled=true; $('exportBtn').disabled=true;
+  $('fetchBtn').disabled=true; $('exportBtn').disabled=true; $('copyBtn').disabled=true;
   log(`🚀 Đang quét ${links.length} link...`, 'log-process');
   dlog(`Bắt đầu quét ${links.length} link — gọi thẳng tikwm.com`);
 
@@ -200,6 +202,7 @@ $('fetchBtn').addEventListener('click', async () => {
   const ok=processedData.filter(d=>d.status==='OK').length;
   const err=processedData.filter(d=>d.status==='ERROR').length;
   $('exportBtn').disabled=ok===0;
+  $('copyBtn').disabled=ok===0;
   log(`🎉 Xong! ${ok} thành công${err>0?`, ${err} lỗi`:'.'}.`, err>0?'log-error':'log-done');
   dlog(`Hoàn tất: ${ok} OK / ${err} lỗi`, ok>0?'ok':'fail');
 });
@@ -225,7 +228,7 @@ function updateRowUI(id, data, isError=false) {
 
 $('clearBtn').addEventListener('click', ()=>{
   $('linkInput').value=''; $('tableBody').innerHTML=''; $('debug-log').innerHTML='';
-  processedData=[]; updateDashboard(); $('exportBtn').disabled=true; log('Đã dọn dẹp! 🧹');
+  processedData=[]; updateDashboard(); $('exportBtn').disabled=true; $('copyBtn').disabled=true; log('Đã dọn dẹp! 🧹');
 });
 
 $('sampleBtn').addEventListener('click', ()=>{
@@ -246,6 +249,43 @@ $('exportBtn').addEventListener('click', ()=>{
   a.download=`TikTok_Report_${new Date().toISOString().slice(0,10)}.csv`;
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
 });
+
+// ============================================================
+// COPY NHANH BẢNG DỮ LIỆU — dạng tab-separated, dán thẳng vào Excel/Sheets
+// ============================================================
+async function copyTableData() {
+  if (!processedData.length) return;
+  const headers=['STT','Kenh','Caption','View','Like','Comment','Save','Share','Link','Trang Thai'];
+  const rows=processedData.map(item=>{
+    if (item.status==='ERROR') return [item.id,'','ERROR',0,0,0,0,0,item.link,'ERROR'];
+    const cap=(item.caption||'').replace(/\t/g,' ').replace(/\n/g,' ');
+    return [item.id,item.author,cap,item.view,item.like,item.comment,item.save,item.share,item.link,'OK'];
+  });
+  const tsv=[headers.join('\t'),...rows.map(r=>r.join('\t'))].join('\n');
+
+  const btn=$('copyBtn');
+  const originalText=btn.textContent;
+  try {
+    await navigator.clipboard.writeText(tsv);
+    btn.textContent='✅ Đã copy!';
+  } catch(err) {
+    // fallback cho trình duyệt/context không hỗ trợ Clipboard API
+    try {
+      const ta=document.createElement('textarea');
+      ta.value=tsv; ta.style.position='fixed'; ta.style.opacity='0';
+      document.body.appendChild(ta); ta.focus(); ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      btn.textContent='✅ Đã copy!';
+    } catch(err2) {
+      btn.textContent='⚠️ Lỗi copy';
+      dlog(`Copy thất bại: ${err2.message}`, 'fail');
+    }
+  }
+  setTimeout(()=>{ btn.textContent=originalText; }, 1600);
+}
+
+$('copyBtn').addEventListener('click', copyTableData);
 </script>
 </body>
 </html>
