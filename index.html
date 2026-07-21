@@ -13,7 +13,7 @@
     #stats-board{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:20px}
     .stat-card{padding:12px;text-align:center;border:3px solid var(--bd);box-shadow:5px 5px 0 var(--bd);border-radius:14px;transition:transform .2s}
     .stat-card:hover{transform:translateY(-2px)}
-    .stat-card:nth-child(1){background:#e0f7fa}.stat-card:nth-child(2){background:#fce4ec}.stat-card:nth-child(3){background:#fff9c4}.stat-card:nth-child(4){background:#f3e5f5}.stat-card:nth-child(5){background:#e8f5e9}
+    .stat-card:nth-child(1){background:#e0f7fa}.stat-card:nth-child(2){background:#fce4ec}.stat-card:nth-child(3){background:#fff9c4}.stat-card:nth-child(4){background:#f3e5f5}.stat-card:nth-child(5){background:#e8f5e9}.stat-card:nth-child(6){background:#ffe0b2}
     .stat-title{font-size:12px;font-weight:700;text-transform:uppercase;margin-bottom:4px}
     .stat-value{font-size:22px;font-weight:800;margin-bottom:6px}
     .stat-avg{font-size:11px;font-weight:600;background:var(--bd);color:var(--white);display:inline-block;padding:3px 8px;border-radius:6px}
@@ -38,13 +38,15 @@
     .toggle-debug{font-size:12px;color:#666;cursor:pointer;margin-bottom:8px;display:inline-block;font-weight:600}
     .toggle-debug:hover{color:#000}
     .table-container{overflow-x:auto;border-radius:12px;border:3px solid var(--bd)}
-    table{width:100%;border-collapse:collapse;min-width:900px;font-family:'Be Vietnam Pro',sans-serif}
+    table{width:100%;border-collapse:collapse;min-width:980px;font-family:'Be Vietnam Pro',sans-serif}
     th{background:var(--secondary);color:var(--bd);font-weight:700;padding:12px;text-align:left;border-bottom:3px solid var(--bd);border-right:2px solid var(--bd);text-transform:uppercase;font-size:13px}
+    th.col-engage-h{background:var(--yellow)}
     td{border-bottom:2px solid var(--bd);border-right:2px solid var(--bd);padding:10px 12px;vertical-align:middle;font-weight:500;font-size:14px}
     tr:last-child td{border-bottom:none}th:last-child,td:last-child{border-right:none}
     tr:nth-child(even){background:#f9f9f9}tr:hover{background:#fffde7}
     .col-thumb img{width:42px;height:42px;object-fit:cover;border-radius:7px;border:2px solid var(--bd);background:#eee}
     .col-caption{max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .col-engage{font-weight:800;color:#e65100}
     .status-ok{color:#00c853;font-weight:800}.status-err{color:#d50000;font-weight:800}
     .col-link a{color:var(--primary);text-decoration:none;font-weight:700;border-bottom:2px solid transparent}
     .col-link a:hover{border-bottom:2px solid var(--primary)}
@@ -61,6 +63,7 @@
     <div class="stat-card"><div class="stat-title">Bình Luận 💬</div><div class="stat-value" id="total-cmt">0</div><div class="stat-avg" id="avg-cmt">TB: 0</div></div>
     <div class="stat-card"><div class="stat-title">Lưu 💾</div><div class="stat-value" id="total-save">0</div><div class="stat-avg" id="avg-save">TB: 0</div></div>
     <div class="stat-card"><div class="stat-title">Chia Sẻ 🔗</div><div class="stat-value" id="total-share">0</div><div class="stat-avg" id="avg-share">TB: 0</div></div>
+    <div class="stat-card"><div class="stat-title">Engage 🔥</div><div class="stat-value" id="total-engage">0</div><div class="stat-avg" id="avg-engage">TB: 0</div></div>
   </div>
 
   <div>
@@ -86,6 +89,7 @@
         <tr>
           <th style="width:44px">#</th><th>Ảnh</th><th>Kênh</th><th>Caption</th>
           <th>View</th><th>Like</th><th>Cmt</th><th>Save</th><th>Share</th>
+          <th class="col-engage-h">Engage 🔥</th>
           <th>Link</th><th>Status</th>
         </tr>
       </thead>
@@ -98,6 +102,7 @@
 const $ = id => document.getElementById(id);
 const fmt = n => (n||0).toLocaleString('vi-VN');
 const sleep = ms => new Promise(r => setTimeout(r, ms));
+const engageOf = item => (item.like||0)+(item.comment||0)+(item.save||0)+(item.share||0);
 
 let processedData = [];
 let isProcessing = false;
@@ -129,6 +134,10 @@ function updateDashboard() {
     $('total-'+id).textContent=fmt(sum(k));
     $('avg-'+id).textContent='TB: '+avg(k);
   });
+  const sumEngage=valid.reduce((a,i)=>a+engageOf(i),0);
+  const avgEngage=n>0?fmt(Math.round(sumEngage/n)):'0';
+  $('total-engage').textContent=fmt(sumEngage);
+  $('avg-engage').textContent='TB: '+avgEngage;
 }
 
 // ============================================================
@@ -210,7 +219,7 @@ $('fetchBtn').addEventListener('click', async () => {
 function createRowUI(id, link) {
   const tr=document.createElement('tr');
   tr.id=`row-${id}`; tr.className='loading-row';
-  tr.innerHTML=`<td>${id}</td><td class="col-thumb"><div style="width:40px;height:40px;background:#ddd;border-radius:6px"></div></td><td style="color:#999">đang tải...</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td class="col-link"><a href="${link}" target="_blank">Xem</a></td><td style="color:#aaa">...</td>`;
+  tr.innerHTML=`<td>${id}</td><td class="col-thumb"><div style="width:40px;height:40px;background:#ddd;border-radius:6px"></div></td><td style="color:#999">đang tải...</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td class="col-link"><a href="${link}" target="_blank">Xem</a></td><td style="color:#aaa">...</td>`;
   $('tableBody').appendChild(tr);
 }
 
@@ -218,11 +227,12 @@ function updateRowUI(id, data, isError=false) {
   const tr=$(`row-${id}`); if(!tr) return;
   tr.classList.remove('loading-row');
   if (isError) {
-    tr.innerHTML=`<td>${id}</td><td colspan="8" style="color:#d50000;text-align:center;font-weight:700">⚠️ ${data.error||'Lỗi không xác định'}</td><td class="col-link"><a href="${data.link}" target="_blank">Link</a></td><td class="status-err">FAIL</td>`;
+    tr.innerHTML=`<td>${id}</td><td colspan="9" style="color:#d50000;text-align:center;font-weight:700">⚠️ ${data.error||'Lỗi không xác định'}</td><td class="col-link"><a href="${data.link}" target="_blank">Link</a></td><td class="status-err">FAIL</td>`;
   } else {
     const cap=(data.caption||'').replace(/"/g,'&quot;');
     const avatar=data.avatar?`<img src="${data.avatar}" loading="lazy">`:`<div style="width:40px;height:40px;background:#eee;border-radius:6px"></div>`;
-    tr.innerHTML=`<td>${id}</td><td class="col-thumb">${avatar}</td><td>@${data.author}</td><td class="col-caption" title="${cap}">${data.caption||''}</td><td>${fmt(data.view)}</td><td>${fmt(data.like)}</td><td>${fmt(data.comment)}</td><td>${fmt(data.save)}</td><td>${fmt(data.share)}</td><td class="col-link"><a href="${data.link}" target="_blank">Xem</a></td><td class="status-ok">OK</td>`;
+    const engage=engageOf(data);
+    tr.innerHTML=`<td>${id}</td><td class="col-thumb">${avatar}</td><td>@${data.author}</td><td class="col-caption" title="${cap}">${data.caption||''}</td><td>${fmt(data.view)}</td><td>${fmt(data.like)}</td><td>${fmt(data.comment)}</td><td>${fmt(data.save)}</td><td>${fmt(data.share)}</td><td class="col-engage">${fmt(engage)}</td><td class="col-link"><a href="${data.link}" target="_blank">Xem</a></td><td class="status-ok">OK</td>`;
   }
 }
 
@@ -237,11 +247,11 @@ $('sampleBtn').addEventListener('click', ()=>{
 
 $('exportBtn').addEventListener('click', ()=>{
   if (!processedData.length) return;
-  const headers=['STT','Kenh','Caption','View','Like','Comment','Save','Share','Link','Trang Thai'];
+  const headers=['STT','Kenh','Caption','View','Like','Comment','Save','Share','Engage','Link','Trang Thai'];
   const rows=processedData.map(item=>{
-    if (item.status==='ERROR') return [item.id,'','ERROR',0,0,0,0,0,item.link,'ERROR'];
+    if (item.status==='ERROR') return [item.id,'','ERROR',0,0,0,0,0,0,item.link,'ERROR'];
     const cap=`"${(item.caption||'').replace(/"/g,'""').replace(/\n/g,' ')}"`;
-    return [item.id,item.author,cap,item.view,item.like,item.comment,item.save,item.share,item.link,'OK'];
+    return [item.id,item.author,cap,item.view,item.like,item.comment,item.save,item.share,engageOf(item),item.link,'OK'];
   });
   const csv=[headers.join(','),...rows.map(r=>r.join(','))].join('\n');
   const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
@@ -255,11 +265,11 @@ $('exportBtn').addEventListener('click', ()=>{
 // ============================================================
 async function copyTableData() {
   if (!processedData.length) return;
-  const headers=['STT','Kenh','Caption','View','Like','Comment','Save','Share','Link','Trang Thai'];
+  const headers=['STT','Kenh','Caption','View','Like','Comment','Save','Share','Engage','Link','Trang Thai'];
   const rows=processedData.map(item=>{
-    if (item.status==='ERROR') return [item.id,'','ERROR',0,0,0,0,0,item.link,'ERROR'];
+    if (item.status==='ERROR') return [item.id,'','ERROR',0,0,0,0,0,0,item.link,'ERROR'];
     const cap=(item.caption||'').replace(/\t/g,' ').replace(/\n/g,' ');
-    return [item.id,item.author,cap,item.view,item.like,item.comment,item.save,item.share,item.link,'OK'];
+    return [item.id,item.author,cap,item.view,item.like,item.comment,item.save,item.share,engageOf(item),item.link,'OK'];
   });
   const tsv=[headers.join('\t'),...rows.map(r=>r.join('\t'))].join('\n');
 
